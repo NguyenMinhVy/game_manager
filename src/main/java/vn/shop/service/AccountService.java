@@ -1,6 +1,9 @@
 package vn.shop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import vn.shop.constant.Constant;
@@ -12,7 +15,6 @@ import vn.shop.entity.Account;
 import vn.shop.mapper.AccountMapper;
 import vn.shop.repository.AccountRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,23 +37,23 @@ public class AccountService extends AbstractService<Account> {
         return accountMapper.accountToAccountDto(account);
     }
 
-    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getAccountDtoList(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort) {
-        List<AccountDto> accountDtoList = getAllAccounts(gameId, minPrice, maxPrice, accountCode, sort);
-        ApiResponseDto<List<AccountDto>> response = ApiResponseDto.<List<AccountDto>>builder()
+    public ResponseEntity<ApiResponseDto<Page<AccountDto>>> getAccountDtoList(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort, Pageable pageable) {
+        Page<AccountDto> accountDtoPage = getAllAccounts(gameId, minPrice, maxPrice, accountCode, sort, pageable);
+        ApiResponseDto<Page<AccountDto>> response = ApiResponseDto.<Page<AccountDto>>builder()
                 .status(Constant.RESPONSE_STATUS.SUCCESS)
                 .message(Constant.RESPONSE_MESSAGE.SUCCESS)
-                .data(accountDtoList)
+                .data(accountDtoPage)
                 .build();
         return ResponseEntity.ok().body(response);
     }
 
-    public List<AccountDto> getAllAccounts(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort) {
-        List<Account> accountList = accountRepository.findAllByGameIdAndDelFlagFalseAAndDisplayTrueOrderByPriority(gameId, minPrice, maxPrice, accountCode, sort);
-        if (accountList.isEmpty()) {
-            return new ArrayList<>();
+    public Page<AccountDto> getAllAccounts(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort, Pageable pageable) {
+        Page<Account> accountPage = accountRepository.findAllByGameIdAndDelFlagFalseAAndDisplayTrueOrderByPriority(gameId, minPrice, maxPrice, accountCode, sort, pageable);
+        if (accountPage.getContent().isEmpty()) {
+            return Page.empty(pageable);
         }
-        List<AccountDto> accountDtoList = accountMapper.accountListToAccountDtoList(accountList);
-        List<Long> accountIdList = accountList.stream()
+        List<AccountDto> accountDtoList = accountMapper.accountListToAccountDtoList(accountPage.getContent());
+        List<Long> accountIdList = accountPage.getContent().stream()
                 .map(Account::getAccountId)
                 .toList();
         List<AccountImageDto> accountImageDtoList = accountImageService.getAccountImageListByAccountIdList(accountIdList);
@@ -61,7 +63,7 @@ public class AccountService extends AbstractService<Account> {
             accountDto.setAccountImageDtoList(List.of(images.get(0)));
         });
 
-        return accountDtoList;
+        return new PageImpl<>(accountDtoList, pageable, accountPage.getTotalElements());
     }
 
     public ResponseEntity<ApiResponseDto<AccountDto>> getAccountDetailDto(Long accountId) {

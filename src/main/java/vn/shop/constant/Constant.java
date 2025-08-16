@@ -3,6 +3,11 @@ package vn.shop.constant;
 
 public interface Constant {
 
+    interface API {
+        String ADMIN = "/api/admin";
+        String PUBLIC = "/api/public";
+    }
+
     interface RESPONSE_STATUS {
         int SUCCESS = 200;
         int BAD_REQUEST = 400;

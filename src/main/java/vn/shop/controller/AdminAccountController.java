@@ -1,6 +1,9 @@
 package vn.shop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,8 +22,8 @@ import vn.shop.service.AccountService;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/admin", method = {RequestMethod.GET, RequestMethod.POST})
-public class AdminController {
+@RequestMapping(value = Constant.API.ADMIN, method = {RequestMethod.GET, RequestMethod.POST})
+public class AdminAccountController {
 
     @Autowired
     private AccountService accountService;
@@ -63,13 +66,17 @@ public class AdminController {
     }
 
     @GetMapping("/account/list")
-    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getListAccount(
+    public ResponseEntity<ApiResponseDto<Page<AccountDto>>>  getListAccount(
             @RequestParam Long gameId,
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
             @RequestParam(required = false) String code,
-            @RequestParam(defaultValue = "asc") String sort)  {
-        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort);
+            @RequestParam(defaultValue = "asc") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    )  {
+        Pageable pageable = PageRequest.of(page, size);
+        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable);
     }
 
     @GetMapping("/account/detail")
