@@ -12,6 +12,7 @@ import vn.shop.config.CustomUserDetails;
 import vn.shop.constant.Constant;
 import vn.shop.dto.AccountDto;
 import vn.shop.dto.AccountImageDto;
+import vn.shop.dto.AccountRegisterDto;
 import vn.shop.dto.ApiResponseDto;
 import vn.shop.entity.Account;
 import vn.shop.mapper.AccountMapper;
@@ -19,6 +20,7 @@ import vn.shop.repository.AccountRepository;
 import vn.shop.service.AccountImageService;
 import vn.shop.service.AccountService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -37,33 +39,6 @@ public class AdminAccountController {
     @Autowired
     private AccountMapper accountMapper;
 
-    @PostMapping("/account/create")
-    public ResponseEntity<ApiResponseDto<AccountDto>> createAccount(@RequestBody AccountDto accountDto,
-                                                            @AuthenticationPrincipal CustomUserDetails currentUser) {
-
-        Account existAccount = accountRepository.findByAccountCode(accountDto.getAccountCode());
-        if (existAccount != null) {
-            ApiResponseDto<AccountDto> errorResponse = ApiResponseDto.<AccountDto>builder()
-                    .status(Constant.RESPONSE_STATUS.BAD_REQUEST)
-                    .message(Constant.RESPONSE_MESSAGE.Account_already_exists)
-                    .data(accountMapper.accountToAccountDto(existAccount))
-                    .build();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-        AccountDto accountResponseDto = accountService.createAccount(accountDto, currentUser);
-        accountDto.getAccountImageDtoList().forEach(accountImage ->
-            accountImage.setAccountId(accountResponseDto.getAccountId())
-        );
-        List<AccountImageDto> accountImageResponseDtoList = accountImageService.createAccountImageList(accountDto.getAccountImageDtoList(), currentUser);
-        accountResponseDto.setAccountImageDtoList(accountImageResponseDtoList);
-
-        ApiResponseDto<AccountDto> successResponseDto = ApiResponseDto.<AccountDto>builder()
-                .status(Constant.RESPONSE_STATUS.SUCCESS)
-                .message(Constant.RESPONSE_MESSAGE.SUCCESS)
-                .data(accountResponseDto)
-                .build();
-        return ResponseEntity.ok().body(successResponseDto);
-    }
 
     @GetMapping("/account/list")
     public ResponseEntity<ApiResponseDto<Page<AccountDto>>>  getListAccount(
@@ -82,5 +57,35 @@ public class AdminAccountController {
     @GetMapping("/account/detail")
     public ResponseEntity<ApiResponseDto<AccountDto>> getAccountDetail(@RequestParam Long accountId) {
         return accountService.getAccountDetailDto(accountId);
+    }
+
+    @PostMapping(value = "/account/create", consumes = {"multipart/form-data"})
+    public ResponseEntity<ApiResponseDto<AccountDto>> createAccount(@ModelAttribute AccountRegisterDto requestDto,
+                                                                    @AuthenticationPrincipal CustomUserDetails currentUser) throws IOException {
+
+        Account existAccount = accountRepository.findByAccountCode(requestDto.getAccountCode());
+        if (existAccount != null) {
+            ApiResponseDto<AccountDto> errorResponse = ApiResponseDto.<AccountDto>builder()
+                    .status(Constant.RESPONSE_STATUS.BAD_REQUEST)
+                    .message(Constant.RESPONSE_MESSAGE.Account_already_exists)
+                    .data(accountMapper.accountToAccountDto(existAccount))
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        AccountDto accountResponseDto = accountService.createAccountFromRequestDto(requestDto, currentUser);
+        if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
+            List<AccountImageDto> accountImageResponseDtoList = accountImageService.saveFiles(
+                    accountResponseDto.getAccountId(),
+                    requestDto.getFiles(),
+                    currentUser
+            );
+            accountResponseDto.setAccountImageDtoList(accountImageResponseDtoList);
+        }
+        ApiResponseDto<AccountDto> successResponseDto = ApiResponseDto.<AccountDto>builder()
+                .status(Constant.RESPONSE_STATUS.SUCCESS)
+                .message(Constant.RESPONSE_MESSAGE.SUCCESS)
+                .data(accountResponseDto)
+                .build();
+        return ResponseEntity.ok().body(successResponseDto);
     }
 }

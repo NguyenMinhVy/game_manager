@@ -57,6 +57,7 @@ public class SpringSecurity {
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/nas/**").permitAll()
                         .anyRequest().authenticated()
                 )
 

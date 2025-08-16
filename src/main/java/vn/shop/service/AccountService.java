@@ -10,6 +10,7 @@ import vn.shop.constant.Constant;
 import vn.shop.dto.AccountDto;
 import vn.shop.config.CustomUserDetails;
 import vn.shop.dto.AccountImageDto;
+import vn.shop.dto.AccountRegisterDto;
 import vn.shop.dto.ApiResponseDto;
 import vn.shop.entity.Account;
 import vn.shop.mapper.AccountMapper;
@@ -85,5 +86,13 @@ public class AccountService extends AbstractService<Account> {
         List<AccountImageDto> accountImageDtoList = accountImageService.getAccountImageListByAccountIdList(List.of(accountId));
         accountDto.setAccountImageDtoList(accountImageDtoList);
         return accountDto;
+    }
+
+    public AccountDto createAccountFromRequestDto(AccountRegisterDto accountDto, CustomUserDetails customUserDetails) {
+        // insert Account
+        Account account = accountMapper.accountRegisterDtoToAccount(accountDto);
+        setInsertInfo(account, customUserDetails.getUserId());
+        accountRepository.save(account);
+        return accountMapper.accountToAccountDto(account);
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import vn.shop.entity.AbstractEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public abstract class AbstractService<ENTITY extends AbstractEntity> {
@@ -18,5 +19,15 @@ public abstract class AbstractService<ENTITY extends AbstractEntity> {
     public void setUpdateInfo(ENTITY entity, Long userId) {
         entity.setUpdateId(userId);
         entity.setUpdateDate(LocalDateTime.now());
+    }
+
+    public void setInsertInfo(List<? extends ENTITY> entities, Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        for (ENTITY entity : entities) {
+            entity.setInsertId(userId);
+            entity.setUpdateId(userId);
+            entity.setInsertDate(now);
+            entity.setUpdateDate(now);
+        }
     }
 }

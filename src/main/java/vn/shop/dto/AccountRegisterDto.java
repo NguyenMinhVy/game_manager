@@ -4,6 +4,7 @@ package vn.shop.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,13 +15,7 @@ public class AccountRegisterDto implements Serializable {
 
     private String accountCode;
 
-    @JsonIgnore
-    private String userNameAccount;
-
-    @JsonIgnore
-    private String passwordAccount;
-
-    private Long price;
+    private Long sellPrice;
 
     private String description;
 
@@ -28,5 +23,7 @@ public class AccountRegisterDto implements Serializable {
 
     private boolean isDisplay;
 
-    private List<AccountImageDto> accountImageDtoList;
+    private Integer gameId;
+
+    private List<MultipartFile> files;
 }
