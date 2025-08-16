@@ -10,15 +10,21 @@ import vn.shop.service.AccountService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/api/public/account")
 public class AccountController {
 
     @Autowired
     private AccountService accountService;
 
     @GetMapping("/list")
-    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getAccountList(@RequestParam Long gameId) {
-        return accountService.getAccountDtoList(gameId);
+    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getAccountList(
+            @RequestParam Long gameId,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false) String code,
+            @RequestParam(defaultValue = "asc") String sort // asc hoặc desc
+    ) {
+        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort);
     }
 
     @GetMapping("/detail")

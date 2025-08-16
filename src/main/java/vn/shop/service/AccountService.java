@@ -35,8 +35,8 @@ public class AccountService extends AbstractService<Account> {
         return accountMapper.accountToAccountDto(account);
     }
 
-    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getAccountDtoList(Long gameId) {
-        List<AccountDto> accountDtoList = getAllAccounts(gameId);
+    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getAccountDtoList(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort) {
+        List<AccountDto> accountDtoList = getAllAccounts(gameId, minPrice, maxPrice, accountCode, sort);
         ApiResponseDto<List<AccountDto>> response = ApiResponseDto.<List<AccountDto>>builder()
                 .status(Constant.RESPONSE_STATUS.SUCCESS)
                 .message(Constant.RESPONSE_MESSAGE.SUCCESS)
@@ -45,8 +45,8 @@ public class AccountService extends AbstractService<Account> {
         return ResponseEntity.ok().body(response);
     }
 
-    public List<AccountDto> getAllAccounts(Long gameId) {
-        List<Account> accountList = accountRepository.findAllByGameIdAndDelFlagFalseAAndDisplayTrueOrderByPriority(gameId);
+    public List<AccountDto> getAllAccounts(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort) {
+        List<Account> accountList = accountRepository.findAllByGameIdAndDelFlagFalseAAndDisplayTrueOrderByPriority(gameId, minPrice, maxPrice, accountCode, sort);
         if (accountList.isEmpty()) {
             return new ArrayList<>();
         }

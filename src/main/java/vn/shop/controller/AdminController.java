@@ -19,7 +19,7 @@ import vn.shop.service.AccountService;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/admin", method = {RequestMethod.GET, RequestMethod.POST})
+@RequestMapping(value = "/api/admin", method = {RequestMethod.GET, RequestMethod.POST})
 public class AdminController {
 
     @Autowired
@@ -63,8 +63,13 @@ public class AdminController {
     }
 
     @GetMapping("/account/list")
-    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getListAccount(@RequestParam Long gameId) {
-        return accountService.getAccountDtoList(gameId);
+    public ResponseEntity<ApiResponseDto<List<AccountDto>>> getListAccount(
+            @RequestParam Long gameId,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false) String code,
+            @RequestParam(defaultValue = "asc") String sort)  {
+        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort);
     }
 
     @GetMapping("/account/detail")
