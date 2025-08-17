@@ -54,8 +54,8 @@ public class AdminAccountController {
         return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable);
     }
 
-    @GetMapping("/account/detail")
-    public ResponseEntity<ApiResponseDto<AccountDto>> getAccountDetail(@RequestParam Long accountId) {
+    @GetMapping("/account/detail/{accountId}")
+    public ResponseEntity<ApiResponseDto<AccountDto>> getAccountDetail(@PathVariable Long accountId) {
         return accountService.getAccountDetailDto(accountId);
     }
 

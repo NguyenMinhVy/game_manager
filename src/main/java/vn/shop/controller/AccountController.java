@@ -34,8 +34,8 @@ public class AccountController {
         return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable);
     }
 
-    @GetMapping("/detail")
-    public ResponseEntity<ApiResponseDto<AccountDto>> getAccountDetail(@RequestParam Long accountId) {
+    @GetMapping("/detail/{accountId}")
+    public ResponseEntity<ApiResponseDto<AccountDto>> getAccountDetail(@PathVariable Long accountId) {
         return accountService.getAccountDetailDto(accountId);
     }
 }

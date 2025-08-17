@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import vn.shop.constant.Constant;
 import vn.shop.dto.AccountDto;
 import vn.shop.config.CustomUserDetails;
@@ -16,6 +17,7 @@ import vn.shop.entity.Account;
 import vn.shop.mapper.AccountMapper;
 import vn.shop.repository.AccountRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -61,7 +63,11 @@ public class AccountService extends AbstractService<Account> {
         accountDtoList.forEach(accountDto -> {
             List<AccountImageDto> images = accountImageDtoList.stream().filter(accountImageDto -> accountDto.getAccountId().equals(accountImageDto.getAccountId())).toList();
             // 1 image dau dai dien
-            accountDto.setAccountImageDtoList(List.of(images.get(0)));
+            if (CollectionUtils.isEmpty(images)) {
+                accountDto.setAccountImageDtoList(new ArrayList<>());
+            }else {
+                accountDto.setAccountImageDtoList(List.of(images.get(0)));
+            }
         });
 
         return new PageImpl<>(accountDtoList, pageable, accountPage.getTotalElements());
