@@ -25,5 +25,6 @@ public interface Constant {
         String NOT_FOUND = "NOT_FOUND";
         String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
         String Account_already_exists ="Tài khoản đã tồn tại";
+        String Account_does_not_exists ="Tài khoản không tồn tại";
     }
 }

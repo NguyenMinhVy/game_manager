@@ -60,6 +60,7 @@ public class AccountService extends AbstractService<Account> {
                 .map(Account::getAccountId)
                 .toList();
         List<AccountImageDto> accountImageDtoList = accountImageService.getAccountImageListByAccountIdList(accountIdList);
+
         accountDtoList.forEach(accountDto -> {
             List<AccountImageDto> images = accountImageDtoList.stream().filter(accountImageDto -> accountDto.getAccountId().equals(accountImageDto.getAccountId())).toList();
             // 1 image dau dai dien
@@ -100,5 +101,16 @@ public class AccountService extends AbstractService<Account> {
         setInsertInfo(account, customUserDetails.getUserId());
         accountRepository.save(account);
         return accountMapper.accountToAccountDto(account);
+    }
+
+    public AccountDto updateAccountFromRequestDto(AccountRegisterDto accountDto, CustomUserDetails customUserDetails) {
+        // insert Account
+        Account existAccount = accountRepository.findByAccountCode(accountDto.getAccountCode());
+        Account newAccount = accountMapper.accountRegisterDtoToAccount(accountDto);
+        newAccount.setAccountCode(existAccount.getAccountCode());
+        newAccount.setAccountId(existAccount.getAccountId());
+        setUpdateInfo(newAccount, customUserDetails.getUserId());
+        accountRepository.save(newAccount);
+        return accountMapper.accountToAccountDto(newAccount);
     }
 }

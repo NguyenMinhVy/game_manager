@@ -34,5 +34,7 @@ public class AccountDto {
 
     private Long gameId;
 
+    private GameDto gameDto;
+
     private List<AccountImageDto> accountImageDtoList;
 }
