@@ -40,8 +40,8 @@ public class AccountService extends AbstractService<Account> {
         return accountMapper.accountToAccountDto(account);
     }
 
-    public ResponseEntity<ApiResponseDto<Page<AccountDto>>> getAccountDtoList(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort, Pageable pageable) {
-        Page<AccountDto> accountDtoPage = getAllAccounts(gameId, minPrice, maxPrice, accountCode, sort, pageable);
+    public ResponseEntity<ApiResponseDto<Page<AccountDto>>> getAccountDtoList(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort, Pageable pageable, Boolean isDisplay, Boolean isSale) {
+        Page<AccountDto> accountDtoPage = getAllAccounts(gameId, minPrice, maxPrice, accountCode, sort, pageable, isDisplay, isSale);
         ApiResponseDto<Page<AccountDto>> response = ApiResponseDto.<Page<AccountDto>>builder()
                 .status(Constant.RESPONSE_STATUS.SUCCESS)
                 .message(Constant.RESPONSE_MESSAGE.SUCCESS)
@@ -50,8 +50,8 @@ public class AccountService extends AbstractService<Account> {
         return ResponseEntity.ok().body(response);
     }
 
-    public Page<AccountDto> getAllAccounts(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort, Pageable pageable) {
-        Page<Account> accountPage = accountRepository.findAllByGameIdAndDelFlagFalseAAndDisplayTrueOrderByPriority(gameId, minPrice, maxPrice, accountCode, sort, pageable);
+    public Page<AccountDto> getAllAccounts(Long gameId, Long minPrice, Long maxPrice, String accountCode, String sort, Pageable pageable, Boolean isDisplay, Boolean isSale) {
+        Page<Account> accountPage = accountRepository.findAllByGameIdAndDelFlagFalseAAndDisplayTrueOrderByPriority(gameId, minPrice, maxPrice, accountCode, sort, pageable, isDisplay, isSale);
         if (accountPage.getContent().isEmpty()) {
             return Page.empty(pageable);
         }

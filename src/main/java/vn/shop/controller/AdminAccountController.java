@@ -53,12 +53,14 @@ public class AdminAccountController {
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
             @RequestParam(required = false) String code,
+            @RequestParam(required = false) Boolean isDisplay,
+            @RequestParam(required = false) Boolean isSale,
             @RequestParam(defaultValue = "asc") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     )  {
         Pageable pageable = PageRequest.of(page, size);
-        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable);
+        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable, isDisplay, isSale);
     }
 
     @GetMapping("/account/detail/{accountId}")

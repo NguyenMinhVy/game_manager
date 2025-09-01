@@ -31,7 +31,7 @@ public class AccountController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable);
+        return accountService.getAccountDtoList(gameId, minPrice, maxPrice, code, sort, pageable, true, false);
     }
 
     @GetMapping("/detail/{accountId}")
