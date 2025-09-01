@@ -26,4 +26,6 @@ public class AccountRegisterDto implements Serializable {
     private Integer gameId;
 
     private List<MultipartFile> files;
+
+    private String oldImages;
 }

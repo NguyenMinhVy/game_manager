@@ -1,5 +1,7 @@
 package vn.shop.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.shop.config.CustomUserDetails;
@@ -98,31 +99,19 @@ public class AdminAccountController {
                     .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-        List<MultipartFile> needToAddFiles = new ArrayList<>();
-        List<AccountImage> needToKeepFiles = new ArrayList<>();
         AccountDto accountResponseDto = accountService.updateAccountFromRequestDto(requestDto, currentUser);
+        String oldImage = requestDto.getOldImages();
+        ObjectMapper mapper = new ObjectMapper();
         List<AccountImage> existAccountImageList = accountImageRepository.findByAccountIdInAndDelFlagFalse(List.of(accountResponseDto.getAccountId()));
-        if (CollectionUtils.isEmpty(requestDto.getFiles())) {
-            accountImageRepository.deleteAll(existAccountImageList);
-        } else {
-            for (MultipartFile file : requestDto.getFiles()) {
-                String fileName = file.getOriginalFilename();
-                AccountImage oldFile = existAccountImageList.stream()
-                        .filter(existAccountImage -> existAccountImage.getImageName()
-                                        .equals(fileName)).findFirst()
-                        .orElse(null);
-                if (oldFile == null) {
-                    needToAddFiles.add(file);
-                } else {
-                    needToKeepFiles.add(oldFile);
-                }
-            }
-            List<AccountImage> needToRemoveFiles = new ArrayList<>(existAccountImageList);
-            needToRemoveFiles.removeAll(needToKeepFiles);
-            needToRemoveFiles.forEach(accountImage -> accountImage.setDelFlag(true));
-            accountImageRepository.saveAll(needToRemoveFiles);
-        }
-        return saveAccountImageFileList(needToAddFiles, currentUser, accountResponseDto);
+        List<AccountImageDto> oldImageList =
+                mapper.readValue(oldImage, new TypeReference<List<AccountImageDto>>() {});
+        List<Long> existAccountImageIdList = existAccountImageList.stream().map(AccountImage::getAccountImageId).toList();
+        List<Long> oldImageIdList = oldImageList.stream().map(AccountImageDto::getAccountImageId).toList();
+        List<Long> needToRemoveIdFiles = new ArrayList<>(existAccountImageIdList);
+        needToRemoveIdFiles.removeAll(oldImageIdList);
+        accountImageRepository.deleteAllById(needToRemoveIdFiles);
+
+        return saveAccountImageFileList(requestDto.getFiles(), currentUser, accountResponseDto);
     }
 
     private ResponseEntity<ApiResponseDto<AccountDto>> saveAccountImageFileList(List<MultipartFile> fileList, @AuthenticationPrincipal CustomUserDetails currentUser, AccountDto accountResponseDto) throws IOException {
